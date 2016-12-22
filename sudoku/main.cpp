@@ -15,7 +15,7 @@ struct Cell
       }
    }
 
-   bool IsUniquely()
+   bool IsUniquely() const
    {
       return values.size() == 1;
    }
@@ -47,14 +47,14 @@ public:
       }
    }
 
-   void Print()
+   void Print() const
    {
       unsigned __int64 variants = 1;
       for (size_t i = 0; i < 9; ++i)
       {
          for (size_t j = 0; j < 9; ++j)
          {
-            Cell &current = Sudoku[i][j];
+            Cell const &current = Sudoku[i][j];
             if (current.IsUniquely())
                std::cout << "#" << static_cast<int>(*current.values.begin()) << "#";
             else
@@ -135,6 +135,55 @@ public:
 
          if (!changes) break;
       }
+   }
+
+   bool IsValid() const
+   {
+      bool freq[10];
+      //Проверка строк и столбцов
+      for (size_t step = 0; step < 2; ++step)
+      {
+         for (size_t i = 0; i < 9; ++i)
+         {
+            memset(freq, 0, sizeof(freq));
+            for (size_t j = 0; j < 9; ++j)
+            {
+               auto const &cell = (step == 0 ? Sudoku[i][j] : Sudoku[j][i]);
+               if (cell.IsUniquely())
+               {
+                  if (freq[*cell.values.begin()] == true)
+                     return false;
+                  else
+                     freq[*cell.values.begin()] = true;
+               }
+            }
+         }
+      }
+
+      //Проверка квадратов
+      for (size_t squadi = 0; squadi < 3; ++squadi)
+      {
+         for (size_t squadj = 0; squadj < 3; ++squadj)
+         {
+            memset(freq, 0, sizeof(freq));
+            for(size_t i = 0; i < 3; ++i)
+            {
+               for(size_t j = 0; j < 3; ++j)
+               {
+                  auto const &cell = Sudoku[squadi*3 + i][squadj*3 + j];
+                  if (cell.IsUniquely())
+                  {
+                     if (freq[*cell.values.begin()] == true)
+                        return false;
+                     else
+                        freq[*cell.values.begin()] = true;
+                  }
+               }
+            }
+         }
+      }
+
+      return true;
    }
 
 private:
@@ -364,12 +413,10 @@ int main(int argc, char **argv)
    std::cout << "Before:" << std::endl;
    test.Print();
 
-   /*test.Prepare();
-   std::cout << std::endl << "Prepared:" << std::endl;
-   test.Print();*/
-
    test.Solve();
    std::cout << std::endl << "After:" << std::endl;
    test.Print();
+
+   std::cout << "Valid: " << (test.IsValid() ? "yes" : "NO!") << std::endl;
    return 0;
 }
