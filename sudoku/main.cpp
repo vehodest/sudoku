@@ -30,6 +30,12 @@ struct Cell
 class Data
 {
 public:
+   enum PrintType
+   {
+      Compact = 0,
+      Verbose = 1
+   };
+
    void Init(char const* data)
    {
       size_t number = 0;
@@ -47,8 +53,10 @@ public:
       }
    }
 
-   void Print() const
+   void Print(PrintType type = PrintType::Compact) const
    {
+      static const char * uSpace[] = {"", "#"};
+
       unsigned __int64 variants = 1;
       for (size_t i = 0; i < 9; ++i)
       {
@@ -56,11 +64,18 @@ public:
          {
             Cell const &current = Sudoku[i][j];
             if (current.IsUniquely())
-               std::cout << "#" << static_cast<int>(*current.values.begin()) << "#";
+               std::cout << uSpace[type] << static_cast<int>(*current.values.begin()) << uSpace[type];
             else
             {
-               std::cout << /*Any*/ "(" << current.values.size() << ")";
-               variants *= current.values.size();
+               if (type == Data::PrintType::Compact)
+               {
+                  std::cout << Any;
+               }
+               else
+               {
+                  std::cout << "(" << current.values.size() << ")";
+                  variants *= current.values.size();
+               }
             }
 
             std::cout << Space;
@@ -411,11 +426,11 @@ int main(int argc, char **argv)
              "* * *  * * *  * * *"//*/
              );
    std::cout << "Before:" << std::endl;
-   test.Print();
+   test.Print(Data::PrintType::Compact);
 
    test.Solve();
    std::cout << std::endl << "After:" << std::endl;
-   test.Print();
+   test.Print(Data::PrintType::Compact);
 
    std::cout << "Valid: " << (test.IsValid() ? "yes" : "NO!") << std::endl;
    return 0;
