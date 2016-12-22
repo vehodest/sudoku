@@ -119,6 +119,20 @@ public:
             }
          }
 
+         Prepare();
+         for (size_t i = 0; i < 9; ++i)
+         {
+            if (CheckRow(i))
+               changes = true;
+         }
+
+         Prepare();
+         for (size_t i = 0; i < 9; ++i)
+         {
+            if (CheckCol(i))
+               changes = true;
+         }
+
          if (!changes) break;
       }
    }
@@ -232,7 +246,79 @@ private:
       return changes;
    }
 
-   //Добавить проверку строк и столбцов по такому же принципу
+   bool CheckRow(size_t row)
+   {
+      bool changes = false;
+
+      //Подсчет частот для каждой цифры в строке (уже определенные цифры не учатсвуют)
+      std::map<Cell::dataType, size_t> freq; //контейнер для частот
+      for (size_t i = 0; i < 9; ++i)
+      {
+         Cell& cell = Sudoku[row][i];
+
+         if (cell.IsUniquely()) continue;
+         for (auto const value: cell.values)
+            ++freq[value];
+      }
+
+      //Для каждой единичной частоты выставляем определенное значение:
+      for (auto const pair: freq)
+      {
+         if (pair.second != 1 ) continue;
+
+         const Cell::dataType& digit = pair.first;
+         for (size_t i = 0; i < 9; ++i)
+         {
+            Cell& cell = Sudoku[row][i];
+
+            if (cell.values.count(digit) > 0)
+            {
+               cell.MakeUniquely(digit);
+               changes = true;
+               break;
+            }
+         }
+      }
+
+      return changes;
+   }
+
+   bool CheckCol(size_t col)
+   {
+      bool changes = false;
+
+      //Подсчет частот для каждой цифры в строке (уже определенные цифры не учатсвуют)
+      std::map<Cell::dataType, size_t> freq; //контейнер для частот
+      for (size_t i = 0; i < 9; ++i)
+      {
+         Cell& cell = Sudoku[i][col];
+
+         if (cell.IsUniquely()) continue;
+         for (auto const value: cell.values)
+            ++freq[value];
+      }
+
+      //Для каждой единичной частоты выставляем определенное значение:
+      for (auto const pair: freq)
+      {
+         if (pair.second != 1 ) continue;
+
+         const Cell::dataType& digit = pair.first;
+         for (size_t i = 0; i < 9; ++i)
+         {
+            Cell& cell = Sudoku[i][col];
+
+            if (cell.values.count(digit) > 0)
+            {
+               cell.MakeUniquely(digit);
+               changes = true;
+               break;
+            }
+         }
+      }
+
+      return changes;
+   }
 };
 
 int main(int argc, char **argv)
