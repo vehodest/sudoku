@@ -104,10 +104,10 @@ public:
 
    void Solve()
    {
+      Prepare();
+
       while(true)
       {
-         Prepare();
-
          bool changes = false;
 
          for (size_t i = 0; i < 3; ++i)
@@ -191,59 +191,15 @@ private:
    bool CheckSquad(size_t squadRow, size_t squadCol)
    {
       bool changes = false;
-      std::map<Cell::dataType, size_t> freq;
-
-      //для каждого квадрата определяем частоту вхождения каждой цифры
-      for (size_t i = 0; i < 3; ++i)
-      {
-         for (size_t j = 0; j < 3; ++j)
-         {
-            Cell& cell = Sudoku[squadRow*3 + i][squadCol*3 + j];
-            if (cell.IsUniquely()) continue;
-
-            for (auto iter = cell.values.begin(); iter != cell.values.end(); ++iter)
-            {
-               ++freq[*iter];
-            }
-         }
-      }
-
-      for (auto iter = freq.begin(); iter != freq.end(); ++iter)
-      {
-         if (iter->second != 1) continue;
-         //если нашли цифру которая входит единожды -- ищем ее:
-         for (size_t i = 0; i < 3; ++i)
-         {
-            for (size_t j = 0; j < 3; ++j)
-            {
-               size_t row = squadRow*3 + i;
-               size_t col = squadCol*3 + j;
-               Cell& cell = Sudoku[row][col];
-
-               if (cell.values.count(iter->first) > 0)
-               {
-                  cell.MakeUniquely(iter->first);
-                  /*RemoveFromCol(col, iter->first);
-                  RemoveFromRow(row, iter->first);*/
-                  return true;
-               }
-            }
-         }
-      }
-
-      /*for (auto iter = freq.begin(); iter != freq.end(); ++iter)
-      {
-         std::cout << static_cast<unsigned int>(iter->first) << ") " << iter->second << std::endl;
-      }//*/
-
-      return false;
+      //реализовать проверку квадрата на единичное вхождения цифры
+      return changes;
    }
 };
 
 int main(int argc, char **argv)
 {
    Data test;
-   test.Init(//*
+   test.Init(/*
              "* * *  * 3 7  6 * *"
              "* * *  6 * *  * 9 *"
              "* * 8  * * *  * * 4"
@@ -255,7 +211,7 @@ int main(int argc, char **argv)
              "7 * *  * * *  8 * *"
              "* 1 *  * * 9  * * *"
              "* * 2  5 4 *  * * *"//*/
-             /*
+             //*
              "* * *  1 * *  9 2 *"
              "* 6 1  * * *  * * *"
              "5 * *  * * *  8 * *"
