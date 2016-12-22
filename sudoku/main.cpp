@@ -71,7 +71,7 @@ public:
          if (i == 2 || i == 5)
             std::cout << std::endl;
       }
-      std::cout << "Variants: " << variants << std::endl;
+      std::cout << "Variants: " << std::hex << variants << std::endl;
    }
 
    void Prepare()
@@ -104,10 +104,10 @@ public:
 
    void Solve()
    {
-      Prepare();
-
       while(true)
       {
+         Prepare();
+
          bool changes = false;
 
          for (size_t i = 0; i < 3; ++i)
@@ -191,7 +191,44 @@ private:
    bool CheckSquad(size_t squadRow, size_t squadCol)
    {
       bool changes = false;
-      //реализовать проверку квадрата на единичное вхождения цифры
+
+      //Подсчет частот для каждой цифры в квадрате (уже определенные цифры не учатсвуют)
+      std::map<Cell::dataType, size_t> freq; //контейнер для частот
+      for (size_t i = 0; i < 3; ++i)
+      {
+         for (size_t j = 0; j < 3; ++j)
+         {
+            size_t row = squadRow * 3 + i;
+            size_t col = squadCol * 3 + j;
+            Cell& cell = Sudoku[row][col];
+
+            if (cell.IsUniquely()) continue;
+            for (auto const value: cell.values)
+               ++freq[value];
+         }
+      }
+
+      //Для каждой единичной частоты выставляем определенное значение:
+      for (auto const pair: freq)
+      {
+         if (pair.second != 1 ) continue;
+
+         const Cell::dataType& digit = pair.first;
+         for (size_t i = 0; i < 9; ++i)
+         {
+            size_t row = squadRow * 3 + i % 3;
+            size_t col = squadCol * 3 + i / 3;
+            Cell& cell = Sudoku[row][col];
+
+            if (cell.values.count(digit) > 0)
+            {
+               cell.MakeUniquely(digit);
+               changes = true;
+               break;
+            }
+         }
+      }
+
       return changes;
    }
 
@@ -246,7 +283,7 @@ int main(int argc, char **argv)
    test.Print();*/
 
    test.Solve();
-   std::cout << std::endl << "Solved:" << std::endl;
+   std::cout << std::endl << "After:" << std::endl;
    test.Print();
    return 0;
 }
