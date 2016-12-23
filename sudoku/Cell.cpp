@@ -6,6 +6,7 @@ Cell::Cell()
    {
       values.insert(i);
    }
+   search = values.end();
 }
 
 bool Cell::IsUniquely() const

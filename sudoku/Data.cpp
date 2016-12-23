@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "Data.h"
 
 void Data::Init(char const* data)
@@ -51,7 +52,7 @@ void Data::Print(PrintType type) const
       if (i == 2 || i == 5)
          std::cout << std::endl;
    }
-   std::cout << "Variants: " << std::hex << variants << std::endl;
+   std::cout << "Variants: " << std::hex << variants << std::dec << std::endl;
 }
 
 void Data::Prepare()
@@ -115,6 +116,8 @@ void Data::Solve()
 
       if (!changes) break;
    }
+
+   Brutforce();
 }
 
 bool Data::IsValid() const
@@ -341,4 +344,25 @@ bool Data::CheckCol(size_t col)
    }
 
    return changes;
+}
+
+void Data::Brutforce()
+{
+   //Вспомогательные функции
+   auto GetRow = [](size_t i) -> size_t { return i / 9; };
+   auto GetCol = [](size_t i) -> size_t { return i % 9; };
+   auto GetI   = [](size_t row, size_t col) -> size_t { return row * 9 + col; };
+
+   std::vector<size_t> values; //адреса ячеек с неопределенными значениями
+   //Заполнение адресов с неопределенными значениями
+   for(size_t i = 0; i < 81; ++i)
+   {
+      size_t row = GetRow(i);
+      size_t col = i % 9;
+
+      if (Sudoku[row][col].IsUniquely()) continue;
+      values.push_back(i);
+   }
+
+
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <map>
-#include "Cell.h";
+#include "Cell.h"
 
 class Data
 {
@@ -29,4 +29,5 @@ private:
    bool CheckSquad(size_t squadRow, size_t squadCol);
    bool CheckRow(size_t row);
    bool CheckCol(size_t col);
+   void Brutforce();
 };

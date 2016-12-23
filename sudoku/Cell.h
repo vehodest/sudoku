@@ -4,11 +4,11 @@
 struct Cell
 {
    typedef char dataType;
-   std::set<dataType> values;
+   typedef std::set<dataType> valuesContainer;
+   valuesContainer values;
+   valuesContainer::const_iterator search;
 
    Cell();
-
    bool IsUniquely() const;
-
    void MakeUniquely(dataType n);
 };
