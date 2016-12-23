@@ -15,6 +15,7 @@ public:
    void Print(PrintType type = PrintType::Compact) const;
    void Prepare();
    void Solve();
+   void Brutforce();
    bool IsValid() const;
 
 private:
@@ -23,11 +24,16 @@ private:
 
    Cell Sudoku[9][9]; //строка, столбец
 
+   //Вспомогательные методы для Prepare
    bool RemoveFromRow(size_t row, Cell::dataType value);
    bool RemoveFromCol(size_t col, Cell::dataType value);
    bool RemoveFromSquad(size_t row, size_t col, Cell::dataType value);
+
+   //Вспомогательные методы для Solve
    bool CheckSquad(size_t squadRow, size_t squadCol);
    bool CheckRow(size_t row);
    bool CheckCol(size_t col);
-   void Brutforce();
+
+   //Вспомогательные методы для Brutforce
+   bool CanSetToCell(size_t row, size_t col, Cell::dataType value) const;
 };

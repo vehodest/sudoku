@@ -346,6 +346,18 @@ bool Data::CheckCol(size_t col)
    return changes;
 }
 
+bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) const
+{
+   //Проверка строки
+   for (size_t i = 0; i < 9; ++i)
+   {
+      //Игнорируем саму ячейку
+      if (i == col) continue;
+   }
+
+   return false;
+}
+
 void Data::Brutforce()
 {
    //Вспомогательные функции
@@ -353,16 +365,23 @@ void Data::Brutforce()
    auto GetCol = [](size_t i) -> size_t { return i % 9; };
    auto GetI   = [](size_t row, size_t col) -> size_t { return row * 9 + col; };
 
-   std::vector<size_t> values; //адреса ячеек с неопределенными значениями
-   //Заполнение адресов с неопределенными значениями
+   std::vector<size_t> values; //номера ячеек с неопределенными значениями
+   //Заполнение адресов с неопределенными значениями и выставление указателей
    for(size_t i = 0; i < 81; ++i)
    {
       size_t row = GetRow(i);
       size_t col = i % 9;
 
-      if (Sudoku[row][col].IsUniquely()) continue;
+      Cell cell = Sudoku[row][col];
+      if (cell.IsUniquely()) continue;
       values.push_back(i);
+      cell.search = cell.values.end();
    }
 
-
+   //Поиск перебором
+   std::vector<size_t>::iterator current = values.begin();
+   while (current != values.end())
+   {
+      //проверка на протичоречивость текущего значения в текущем столбце
+   }
 }
