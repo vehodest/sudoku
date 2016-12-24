@@ -110,55 +110,39 @@ bool Data::Solve(unsigned __int64 &steps)
       if (!changes) break;
    }
 
-   return false;/*Brutforce(steps);*/
+   return Brutforce(steps);
 }
 
 bool Data::IsValid() const
 {
+   for (size_t i = 0; i < TableLength; ++i)
+   {
+      if (!IsValidFrom(RowPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))) ||
+          !IsValidFrom(ColumnPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))) ||
+          !IsValidFrom(SquadPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))))
+      {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+bool Data::IsValidFrom(BasePart& part) const
+{
    bool freq[10];
-   //Проверка строк и столбцов
-   for (size_t step = 0; step < 2; ++step)
+   memset(freq, 0, sizeof(freq));
+   for (size_t i = 0; i < TableLength; ++i)
    {
-      for (size_t i = 0; i < TableLength; ++i)
+      auto const &cell = part[i];
+      if (cell.IsUniquely())
       {
-         memset(freq, 0, sizeof(freq));
-         for (size_t j = 0; j < TableLength; ++j)
-         {
-            auto const &cell = (step == 0 ? Sudoku[i][j] : Sudoku[j][i]);
-            if (cell.IsUniquely())
-            {
-               if (freq[*cell.values.begin()] == true)
-                  return false;
-               else
-                  freq[*cell.values.begin()] = true;
-            }
-         }
+         if (freq[*cell.values.begin()] == true)
+            return false;
+         else
+            freq[*cell.values.begin()] = true;
       }
    }
-
-   //Проверка квадратов
-   for (size_t squadi = 0; squadi < SquadLength; ++squadi)
-   {
-      for (size_t squadj = 0; squadj < SquadLength; ++squadj)
-      {
-         memset(freq, 0, sizeof(freq));
-         for(size_t i = 0; i < SquadLength; ++i)
-         {
-            for(size_t j = 0; j < SquadLength; ++j)
-            {
-               auto const &cell = Sudoku[squadi*SquadLength + i][squadj*SquadLength + j];
-               if (cell.IsUniquely())
-               {
-                  if (freq[*cell.values.begin()] == true)
-                     return false;
-                  else
-                     freq[*cell.values.begin()] = true;
-               }
-            }
-         }
-      }
-   }
-
    return true;
 }
 
@@ -229,7 +213,7 @@ inline bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) con
       return true;
    };
 
-   //Проверка строка и столбца
+   //Проверка строки и столбца
    for (size_t i = 0; i < TableLength; ++i)
    {
       //проверка строки

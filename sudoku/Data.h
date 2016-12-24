@@ -91,6 +91,9 @@ private:
    //Вспомогательные методы для Solve
    bool CheckFrom(BasePart& part);
 
+   //Вспомогательные методы для IsValud
+   bool IsValidFrom(BasePart& part) const;
+
    //Вспомогательные методы для Brutforce
    inline bool CanSetToCell(size_t row, size_t col, Cell::dataType value) const;
 };
