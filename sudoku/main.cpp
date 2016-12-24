@@ -42,17 +42,17 @@ int main(int argc, char **argv)
              "3 * *  * 1 *  * * *"
              "6 * *  8 * *  * * 9"//*/
              /*
-             "*2* 9*3 ***"
-             "357 *** ***"
-             "*** 6** *38"
+             "*5* 2*7 ***"
+             "*** **9 4**"
+             "7** **4 ***"
 
-             "**9 *84 ***"
-             "*** *9* 3*6"
-             "7*3 **6 *4*"
+             "2*1 *5* **7"
+             "*** 3** 1**"
+             "**4 *9* *8*"
 
-             "*** *3* 891"
-             "*35 1** *2*"
-             "29* 47* ***"//*/
+             "*49 *** 5*8"
+             "**6 *** ***"
+             "*1* *** *3*"//*/
              );
    std::cout << "Before:" << std::endl;
    test.Print(Data::PrintType::Compact);
@@ -60,15 +60,16 @@ int main(int argc, char **argv)
    unsigned __int64 steps;
    
    auto start = std::chrono::high_resolution_clock::now();
-   bool result = test.Solve(steps);
+   bool result = test.Solve(true, steps);
    auto end = std::chrono::high_resolution_clock::now();
-   
+   auto ms = std::chrono::duration<double, std::milli>(end-start).count();
+
    std::cout << std::endl << "After:" << std::endl;
    test.Print(Data::PrintType::Compact);
 
-   std::cout << "Solved: " << (result ? "yes" : "no") << std::endl;
-   std::cout << "Brutforce steps: " << steps << std::endl;
-   std::cout << "Valid: " << (test.IsValid() ? "yes" : "NO!") << std::endl;
-   std::cout << "Duration: " << std::chrono::duration<double, std::milli>(end-start).count() << " ms" << std::endl;
+   std::cout << std::endl
+             << "Result      : " << (result ? "solved" : "can't solve") << std::endl
+             << "Valid       : " << (test.IsValid() ? "yes" : "no") << std::endl
+             << "Performance : " << steps << " steps in " << ms << " ms" << std::endl;
    return 0;
 }

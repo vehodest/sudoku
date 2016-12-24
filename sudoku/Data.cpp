@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include "Data.h"
 
 void Data::Init(char const* data)
@@ -23,11 +22,16 @@ void Data::Print(PrintType type) const
 {
    static const char * uSpace[] = {"", "#"};
 
-   unsigned __int64 variants = 1;
    for (size_t i = 0; i < TableLength; ++i)
    {
+      if (i != 0 && i % 3 == 0)
+         std::cout << std::endl;
+
       for (size_t j = 0; j < TableLength; ++j)
       {
+         if (j != 0 && j % 3 == 0)
+            std::cout << Space;
+
          Cell const &current = Sudoku[i][j];
          if (current.IsUniquely())
             std::cout << uSpace[type] << static_cast<int>(*current.values.begin()) << uSpace[type];
@@ -37,19 +41,12 @@ void Data::Print(PrintType type) const
                std::cout << Any;
             else
                std::cout << "(" << current.values.size() << ")";
-
-            variants *= current.values.size();
          }
 
          std::cout << Space;
-         if (j == 2 || j == 5)
-            std::cout << Space;
       }
       std::cout << std::endl;
-      if (i == 2 || i == 5)
-         std::cout << std::endl;
    }
-   std::cout << "Variants: " << std::hex << variants << std::dec << std::endl;
 }
 
 void Data::Prepare()
@@ -80,7 +77,7 @@ void Data::Prepare()
    }
 }
 
-bool Data::Solve(unsigned __int64 &steps)
+bool Data::Solve(bool useRecursion, unsigned __int64 &steps)
 {
    while(true)
    {
@@ -110,7 +107,7 @@ bool Data::Solve(unsigned __int64 &steps)
       if (!changes) break;
    }
 
-   return Brutforce(steps);
+   return useRecursion ? RBrutforce(steps) : Brutforce(steps);
 }
 
 bool Data::IsValid() const
@@ -128,7 +125,7 @@ bool Data::IsValid() const
    return true;
 }
 
-bool Data::IsValidFrom(BasePart& part) const
+bool Data::IsValidFrom(BasePart& part)
 {
    bool freq[10];
    memset(freq, 0, sizeof(freq));
@@ -242,10 +239,6 @@ inline bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) con
 
 bool Data::Brutforce(unsigned __int64 &steps)
 {
-   //Вспомогательные функции
-   auto GetRow = [](size_t i) -> size_t { return i / TableLength; };
-   auto GetCol = [](size_t i) -> size_t { return i % TableLength; };
-
    std::vector<size_t> values; //номера ячеек с неопределенными значениями
    //Заполнение адресов с неопределенными значениями и выставление указателей
    for(size_t i = 0; i < 81; ++i)
@@ -306,4 +299,57 @@ bool Data::Brutforce(unsigned __int64 &steps)
    }
 
    return true;
+}
+
+bool Data::RBrutforce(unsigned __int64 &steps)
+{
+   std::vector<size_t> values; //номера ячеек с неопределенными значениями
+   //Заполнение адресов с неопределенными значениями и выставление указателей
+   for(size_t i = 0; i < 81; ++i)
+   {
+      Cell &cell = Sudoku[GetRow(i)][GetCol(i)];
+      if (cell.IsUniquely())
+         continue;
+      values.push_back(i);
+      cell.search = cell.values.end();
+   }
+
+   steps = 0; //количество шагов в поиске решения
+   bool result = Recursion(values.begin(), values.end(), steps);
+   
+   //Расстановка найденых значений
+   for(size_t i = 0; i < 81; ++i)
+   {
+      Cell &cell = Sudoku[GetRow(i)][GetCol(i)];
+      if (cell.IsUniquely())
+         continue;
+      cell.MakeUniquely(*cell.search);
+   }
+
+   return result;
+}
+
+bool Data::Recursion(std::vector<size_t>::iterator current, std::vector<size_t>::iterator end,
+                     unsigned __int64 &steps)
+{
+   if (current == end)
+      return true;
+
+   //Определение текущей ячейки
+   size_t row = GetRow(*current);
+   size_t col = GetCol(*current);
+   Cell &cell = Sudoku[row][col];
+
+   for(cell.search = cell.values.begin(); cell.search != cell.values.end(); ++cell.search)
+   {
+      ++steps;
+      if (CanSetToCell(row, col, *cell.search)) //ищем возможное значение
+      {
+         //двигаться вперед
+         if (Recursion(current + 1, end, steps))
+            return true;
+      }
+   }
+
+   return false;
 }
