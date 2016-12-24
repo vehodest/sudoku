@@ -67,6 +67,10 @@ private:
    class SquadPart: public BasePart
    {
    public:
+      SquadPart(size_t squadIndex, Cell (&sudoku)[TableLength][TableLength]):
+         BasePart(squadIndex, sudoku)
+      {}
+
       SquadPart(size_t squadRow, size_t squadCol, Cell (&sudoku)[TableLength][TableLength]):
          BasePart(squadRow + squadCol*SquadLength, sudoku)
       {}
@@ -85,9 +89,7 @@ private:
    bool RemoveFrom(BasePart& part, Cell::dataType value);
 
    //Вспомогательные методы для Solve
-   bool CheckSquad(size_t squadRow, size_t squadCol);
-   bool CheckRow(size_t row);
-   bool CheckCol(size_t col);
+   bool CheckFrom(BasePart& part);
 
    //Вспомогательные методы для Brutforce
    inline bool CanSetToCell(size_t row, size_t col, Cell::dataType value) const;

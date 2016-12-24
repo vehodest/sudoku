@@ -84,30 +84,26 @@ bool Data::Solve(unsigned __int64 &steps)
 {
    while(true)
    {
-      Prepare();
-
       bool changes = false;
-
-      for (size_t i = 0; i < SquadLength; ++i)
-      {
-         for(size_t j = 0; j < SquadLength; ++j)
-         {
-            if (CheckSquad(i, j))
-               changes = true;
-         }
-      }
-
+      
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckRow(i))
+         if (CheckFrom(SquadPart(i, Sudoku)))
             changes = true;
       }
 
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckCol(i))
+         if (CheckFrom(RowPart(i, Sudoku)))
+            changes = true;
+      }
+
+      Prepare();
+      for (size_t i = 0; i < TableLength; ++i)
+      {
+         if (CheckFrom(ColumnPart(i, Sudoku)))
             changes = true;
       }
 
@@ -183,59 +179,15 @@ bool Data::RemoveFrom(BasePart& part, Cell::dataType value)
    return changes;
 }
 
-bool Data::CheckSquad(size_t squadRow, size_t squadCol)
+bool Data::CheckFrom(BasePart& part)
 {
    bool changes = false;
 
-   //Подсчет частот для каждой цифры в квадрате (уже определенные цифры не учатсвуют)
-   std::map<Cell::dataType, size_t> freq; //контейнер для частот
-   for (size_t i = 0; i < SquadLength; ++i)
-   {
-      for (size_t j = 0; j < SquadLength; ++j)
-      {
-         size_t row = squadRow * SquadLength + i;
-         size_t col = squadCol * SquadLength + j;
-         Cell& cell = Sudoku[row][col];
-
-         if (cell.IsUniquely()) continue;
-         for (auto const value: cell.values)
-            ++freq[value];
-      }
-   }
-
-   //Для каждой единичной частоты выставляем определенное значение:
-   for (auto const pair: freq)
-   {
-      if (pair.second != 1 ) continue;
-
-      const Cell::dataType& digit = pair.first;
-      for (size_t i = 0; i < TableLength; ++i)
-      {
-         size_t row = squadRow * SquadLength + i % SquadLength;
-         size_t col = squadCol * SquadLength + i / SquadLength;
-         Cell& cell = Sudoku[row][col];
-
-         if (cell.values.count(digit) > 0)
-         {
-            cell.MakeUniquely(digit);
-            changes = true;
-            break;
-         }
-      }
-   }
-
-   return changes;
-}
-
-bool Data::CheckRow(size_t row)
-{
-   bool changes = false;
-
-   //Подсчет частот для каждой цифры в строке (уже определенные цифры не учатсвуют)
+   //Подсчет частот для каждой цифры (уже определенные цифры не учатсвуют)
    std::map<Cell::dataType, size_t> freq; //контейнер для частот
    for (size_t i = 0; i < TableLength; ++i)
    {
-      Cell& cell = Sudoku[row][i];
+      Cell& cell = part[i];
 
       if (cell.IsUniquely()) continue;
       for (auto const value: cell.values)
@@ -250,44 +202,7 @@ bool Data::CheckRow(size_t row)
       const Cell::dataType& digit = pair.first;
       for (size_t i = 0; i < TableLength; ++i)
       {
-         Cell& cell = Sudoku[row][i];
-
-         if (cell.values.count(digit) > 0)
-         {
-            cell.MakeUniquely(digit);
-            changes = true;
-            break;
-         }
-      }
-   }
-
-   return changes;
-}
-
-bool Data::CheckCol(size_t col)
-{
-   bool changes = false;
-
-   //Подсчет частот для каждой цифры в строке (уже определенные цифры не учатсвуют)
-   std::map<Cell::dataType, size_t> freq; //контейнер для частот
-   for (size_t i = 0; i < TableLength; ++i)
-   {
-      Cell& cell = Sudoku[i][col];
-
-      if (cell.IsUniquely()) continue;
-      for (auto const value: cell.values)
-         ++freq[value];
-   }
-
-   //Для каждой единичной частоты выставляем определенное значение:
-   for (auto const pair: freq)
-   {
-      if (pair.second != 1 ) continue;
-
-      const Cell::dataType& digit = pair.first;
-      for (size_t i = 0; i < TableLength; ++i)
-      {
-         Cell& cell = Sudoku[i][col];
+         Cell& cell = part[i];
 
          if (cell.values.count(digit) > 0)
          {
