@@ -35,5 +35,5 @@ private:
    bool CheckCol(size_t col);
 
    //Вспомогательные методы для Brutforce
-   bool CanSetToCell(size_t row, size_t col, Cell::dataType value) const;
+   inline bool CanSetToCell(size_t row, size_t col, Cell::dataType value) const;
 };
