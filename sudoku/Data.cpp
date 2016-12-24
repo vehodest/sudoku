@@ -63,11 +63,17 @@ void Data::Prepare()
             if (cell.IsUniquely())
             {
                Cell::dataType value = *cell.values.begin();
-               bool rowRemove = RemoveFrom(RowPart(row, Sudoku), value);
-               bool colRemove = RemoveFrom(ColumnPart(col, Sudoku), value);
-               bool squadRemove = RemoveFrom(SquadPart(row / SquadLength, col / SquadLength, Sudoku), value);
+               
+               RowPart rowPart(row, Sudoku);
+               bool rowRemove = RemoveFrom(rowPart, value);
 
-               if (rowRemove || colRemove || squadRemove)
+               ColumnPart colPart(col, Sudoku);
+               bool colRemove = RemoveFrom(colPart, value);
+
+               SquarePart squarePart(row / SquareLength, col / SquareLength, Sudoku);
+               bool squareRemove = RemoveFrom(squarePart, value);
+
+               if (rowRemove || colRemove || squareRemove)
                   changes = true;
             }
          }
@@ -77,7 +83,7 @@ void Data::Prepare()
    }
 }
 
-bool Data::Solve(bool useRecursion, unsigned __int64 &steps)
+bool Data::Solve(bool useRecursion, unsigned long long &steps)
 {
    while(true)
    {
@@ -86,21 +92,24 @@ bool Data::Solve(bool useRecursion, unsigned __int64 &steps)
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckFrom(SquadPart(i, Sudoku)))
+         SquarePart part(i, Sudoku);
+         if (CheckFrom(part))
             changes = true;
       }
 
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckFrom(RowPart(i, Sudoku)))
+         RowPart part(i, Sudoku);
+         if (CheckFrom(part))
             changes = true;
       }
 
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckFrom(ColumnPart(i, Sudoku)))
+         ColumnPart part(i, Sudoku);
+         if (CheckFrom(part))
             changes = true;
       }
 
@@ -114,9 +123,12 @@ bool Data::IsValid() const
 {
    for (size_t i = 0; i < TableLength; ++i)
    {
-      if (!IsValidFrom(RowPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))) ||
-          !IsValidFrom(ColumnPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))) ||
-          !IsValidFrom(SquadPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))))
+      RowPart rowPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      ColumnPart columnPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      SquarePart squarePart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      if (!IsValidFrom(rowPart) ||
+          !IsValidFrom(columnPart) ||
+          !IsValidFrom(squarePart))
       {
          return false;
       }
@@ -127,8 +139,7 @@ bool Data::IsValid() const
 
 bool Data::IsValidFrom(BasePart& part)
 {
-   bool freq[10];
-   memset(freq, 0, sizeof(freq));
+   bool freq[10] = { 0 };
    for (size_t i = 0; i < TableLength; ++i)
    {
       auto const &cell = part[i];
@@ -223,11 +234,11 @@ inline bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) con
    }
 
    //Проверка квадрата
-   size_t squadRow = row / SquadLength;
-   size_t squadCol = col / SquadLength;
-   for (size_t i = SquadLength*squadRow; i < SquadLength*squadRow + SquadLength; ++i)
+   size_t squareRow = row / SquareLength;
+   size_t squareCol = col / SquareLength;
+   for (size_t i = SquareLength*squareRow; i < SquareLength*squareRow + SquareLength; ++i)
    {
-      for (size_t j = SquadLength*squadCol; j < SquadLength*squadCol + SquadLength; ++j)
+      for (size_t j = SquareLength*squareCol; j < SquareLength*squareCol + SquareLength; ++j)
       {
          if (i != row && j != col && !isCoincides(Sudoku[i][j], value))
             return false;
@@ -237,7 +248,7 @@ inline bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) con
    return true;
 }
 
-bool Data::Brutforce(unsigned __int64 &steps)
+bool Data::Brutforce(unsigned long long &steps)
 {
    std::vector<size_t> values; //номера ячеек с неопределенными значениями
    //Заполнение адресов с неопределенными значениями и выставление указателей
@@ -301,7 +312,7 @@ bool Data::Brutforce(unsigned __int64 &steps)
    return true;
 }
 
-bool Data::RBrutforce(unsigned __int64 &steps)
+bool Data::RBrutforce(unsigned long long &steps)
 {
    std::vector<size_t> values; //номера ячеек с неопределенными значениями
    //Заполнение адресов с неопределенными значениями и выставление указателей
@@ -330,7 +341,7 @@ bool Data::RBrutforce(unsigned __int64 &steps)
 }
 
 bool Data::Recursion(std::vector<size_t>::iterator current, std::vector<size_t>::iterator end,
-                     unsigned __int64 &steps)
+                     unsigned long long &steps)
 {
    if (current == end)
       return true;
