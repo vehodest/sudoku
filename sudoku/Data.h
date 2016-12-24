@@ -14,8 +14,8 @@ public:
    void Init(char const* data);
    void Print(PrintType type = PrintType::Compact) const;
    void Prepare();
-   void Solve();
-   void Brutforce();
+   bool Solve(unsigned __int64 &steps);
+   bool Brutforce(unsigned __int64 &steps);
    bool IsValid() const;
 
 private:
