@@ -57,7 +57,7 @@ int main(int argc, char **argv)
    std::cout << "Before:" << std::endl;
    test.Print(Data::PrintType::Compact);
 
-   unsigned __int64 steps;
+   unsigned long long steps;
    
    auto start = std::chrono::high_resolution_clock::now();
    bool result = test.Solve(true, steps);

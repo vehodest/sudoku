@@ -77,7 +77,7 @@ void Data::Prepare()
    }
 }
 
-bool Data::Solve(bool useRecursion, unsigned __int64 &steps)
+bool Data::Solve(bool useRecursion, unsigned long long &steps)
 {
    while(true)
    {
@@ -237,7 +237,7 @@ inline bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) con
    return true;
 }
 
-bool Data::Brutforce(unsigned __int64 &steps)
+bool Data::Brutforce(unsigned long long &steps)
 {
    std::vector<size_t> values; //номера ячеек с неопределенными значениями
    //Заполнение адресов с неопределенными значениями и выставление указателей
@@ -301,7 +301,7 @@ bool Data::Brutforce(unsigned __int64 &steps)
    return true;
 }
 
-bool Data::RBrutforce(unsigned __int64 &steps)
+bool Data::RBrutforce(unsigned long long &steps)
 {
    std::vector<size_t> values; //номера ячеек с неопределенными значениями
    //Заполнение адресов с неопределенными значениями и выставление указателей
@@ -330,7 +330,7 @@ bool Data::RBrutforce(unsigned __int64 &steps)
 }
 
 bool Data::Recursion(std::vector<size_t>::iterator current, std::vector<size_t>::iterator end,
-                     unsigned __int64 &steps)
+                     unsigned long long &steps)
 {
    if (current == end)
       return true;

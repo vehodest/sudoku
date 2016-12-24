@@ -15,9 +15,9 @@ public:
    void Init(char const* data);
    void Print(PrintType type = PrintType::Compact) const;
    void Prepare();
-   bool Solve(bool useRecursion, unsigned __int64 &steps);
-   bool Brutforce(unsigned __int64 &steps);
-   bool RBrutforce(unsigned __int64 &steps);
+   bool Solve(bool useRecursion, unsigned long long &steps);
+   bool Brutforce(unsigned long long &steps);
+   bool RBrutforce(unsigned long long &steps);
    bool IsValid() const;
 
 private:
@@ -104,5 +104,5 @@ private:
 
    bool Recursion(std::vector<size_t>::iterator current,
                   std::vector<size_t>::iterator end,
-                  unsigned __int64 &steps);
+                  unsigned long long &steps);
 };
