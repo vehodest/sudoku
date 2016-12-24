@@ -24,7 +24,7 @@ private:
    static const char Any = '*';
    static const char Space = ' ';
    static const size_t TableLength = 9;
-   static const size_t SquadLength = 3;
+   static const size_t SquareLength = 3;
 
    class BasePart
    {
@@ -66,21 +66,21 @@ private:
       }
    };
 
-   class SquadPart: public BasePart
+   class SquarePart: public BasePart
    {
    public:
-      SquadPart(size_t squadIndex, Cell (&sudoku)[TableLength][TableLength]):
-         BasePart(squadIndex, sudoku)
+      SquarePart(size_t squareIndex, Cell (&sudoku)[TableLength][TableLength]):
+         BasePart(squareIndex, sudoku)
       {}
 
-      SquadPart(size_t squadRow, size_t squadCol, Cell (&sudoku)[TableLength][TableLength]):
-         BasePart(squadRow + squadCol*SquadLength, sudoku)
+      SquarePart(size_t squareRow, size_t squareCol, Cell (&sudoku)[TableLength][TableLength]):
+         BasePart(squareRow + squareCol*SquareLength, sudoku)
       {}
 
       Cell &operator[](size_t index)
       {
-         size_t row = (Param % SquadLength)*SquadLength + index % SquadLength;
-         size_t col = (Param / SquadLength)*SquadLength + index / SquadLength;
+         size_t row = (Param % SquareLength)*SquareLength + index % SquareLength;
+         size_t col = (Param / SquareLength)*SquareLength + index / SquareLength;
          return Sudoku[row][col];
       }
    };

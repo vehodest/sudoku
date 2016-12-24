@@ -70,10 +70,10 @@ void Data::Prepare()
                ColumnPart colPart(col, Sudoku);
                bool colRemove = RemoveFrom(colPart, value);
 
-               SquadPart squadPart(row / SquadLength, col / SquadLength, Sudoku);
-               bool squadRemove = RemoveFrom(squadPart, value);
+               SquarePart squarePart(row / SquareLength, col / SquareLength, Sudoku);
+               bool squareRemove = RemoveFrom(squarePart, value);
 
-               if (rowRemove || colRemove || squadRemove)
+               if (rowRemove || colRemove || squareRemove)
                   changes = true;
             }
          }
@@ -92,7 +92,7 @@ bool Data::Solve(bool useRecursion, unsigned long long &steps)
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         SquadPart part(i, Sudoku);
+         SquarePart part(i, Sudoku);
          if (CheckFrom(part))
             changes = true;
       }
@@ -125,10 +125,10 @@ bool Data::IsValid() const
    {
       RowPart rowPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
       ColumnPart columnPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
-      SquadPart squadPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      SquarePart squarePart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
       if (!IsValidFrom(rowPart) ||
           !IsValidFrom(columnPart) ||
-          !IsValidFrom(squadPart))
+          !IsValidFrom(squarePart))
       {
          return false;
       }
@@ -234,11 +234,11 @@ inline bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) con
    }
 
    //Проверка квадрата
-   size_t squadRow = row / SquadLength;
-   size_t squadCol = col / SquadLength;
-   for (size_t i = SquadLength*squadRow; i < SquadLength*squadRow + SquadLength; ++i)
+   size_t squareRow = row / SquareLength;
+   size_t squareCol = col / SquareLength;
+   for (size_t i = SquareLength*squareRow; i < SquareLength*squareRow + SquareLength; ++i)
    {
-      for (size_t j = SquadLength*squadCol; j < SquadLength*squadCol + SquadLength; ++j)
+      for (size_t j = SquareLength*squareCol; j < SquareLength*squareCol + SquareLength; ++j)
       {
          if (i != row && j != col && !isCoincides(Sudoku[i][j], value))
             return false;
