@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <vector>
 #include "Cell.h"
 
 class Data
@@ -14,8 +15,9 @@ public:
    void Init(char const* data);
    void Print(PrintType type = PrintType::Compact) const;
    void Prepare();
-   bool Solve(unsigned __int64 &steps);
+   bool Solve(bool useRecursion, unsigned __int64 &steps);
    bool Brutforce(unsigned __int64 &steps);
+   bool RBrutforce(unsigned __int64 &steps);
    bool IsValid() const;
 
 private:
@@ -86,14 +88,21 @@ private:
    Cell Sudoku[TableLength][TableLength]; //строка, столбец
 
    //Вспомогательные методы для Prepare
-   bool RemoveFrom(BasePart& part, Cell::dataType value);
+   static bool RemoveFrom(BasePart& part, Cell::dataType value);
 
    //Вспомогательные методы для Solve
-   bool CheckFrom(BasePart& part);
+   static bool CheckFrom(BasePart& part);
 
-   //Вспомогательные методы для IsValud
-   bool IsValidFrom(BasePart& part) const;
+   //Вспомогательные методы для IsValid
+   static bool IsValidFrom(BasePart& part);
 
    //Вспомогательные методы для Brutforce
+   static inline size_t GetRow(size_t i) { return i / TableLength; };
+   static inline size_t GetCol(size_t i) { return i % TableLength; };
+
    inline bool CanSetToCell(size_t row, size_t col, Cell::dataType value) const;
+
+   bool Recursion(std::vector<size_t>::iterator current,
+                  std::vector<size_t>::iterator end,
+                  unsigned __int64 &steps);
 };
