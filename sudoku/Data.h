@@ -88,10 +88,10 @@ private:
    Cell Sudoku[TableLength][TableLength]; //строка, столбец
 
    //Вспомогательные методы для Prepare
-   static bool RemoveFrom(BasePart& part, Cell::dataType value);
+   bool RemoveFrom(BasePart& part, Cell::dataType value);
 
    //Вспомогательные методы для Solve
-   static bool CheckFrom(BasePart& part);
+   bool CheckFrom(BasePart& part);
 
    //Вспомогательные методы для IsValid
    static bool IsValidFrom(BasePart& part);

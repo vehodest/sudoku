@@ -63,9 +63,15 @@ void Data::Prepare()
             if (cell.IsUniquely())
             {
                Cell::dataType value = *cell.values.begin();
-               bool rowRemove = RemoveFrom(RowPart(row, Sudoku), value);
-               bool colRemove = RemoveFrom(ColumnPart(col, Sudoku), value);
-               bool squadRemove = RemoveFrom(SquadPart(row / SquadLength, col / SquadLength, Sudoku), value);
+               
+               RowPart rowPart(row, Sudoku);
+               bool rowRemove = RemoveFrom(rowPart, value);
+
+               ColumnPart colPart(col, Sudoku);
+               bool colRemove = RemoveFrom(colPart, value);
+
+               SquadPart squadPart(row / SquadLength, col / SquadLength, Sudoku);
+               bool squadRemove = RemoveFrom(squadPart, value);
 
                if (rowRemove || colRemove || squadRemove)
                   changes = true;
@@ -86,21 +92,24 @@ bool Data::Solve(bool useRecursion, unsigned long long &steps)
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckFrom(SquadPart(i, Sudoku)))
+         SquadPart part(i, Sudoku);
+         if (CheckFrom(part))
             changes = true;
       }
 
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckFrom(RowPart(i, Sudoku)))
+         RowPart part(i, Sudoku);
+         if (CheckFrom(part))
             changes = true;
       }
 
       Prepare();
       for (size_t i = 0; i < TableLength; ++i)
       {
-         if (CheckFrom(ColumnPart(i, Sudoku)))
+         ColumnPart part(i, Sudoku);
+         if (CheckFrom(part))
             changes = true;
       }
 
@@ -114,9 +123,12 @@ bool Data::IsValid() const
 {
    for (size_t i = 0; i < TableLength; ++i)
    {
-      if (!IsValidFrom(RowPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))) ||
-          !IsValidFrom(ColumnPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))) ||
-          !IsValidFrom(SquadPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku))))
+      RowPart rowPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      ColumnPart columnPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      SquadPart squadPart(i, const_cast<Cell (&)[TableLength][TableLength]>(Sudoku));
+      if (!IsValidFrom(rowPart) ||
+          !IsValidFrom(columnPart) ||
+          !IsValidFrom(squadPart))
       {
          return false;
       }
@@ -127,8 +139,7 @@ bool Data::IsValid() const
 
 bool Data::IsValidFrom(BasePart& part)
 {
-   bool freq[10];
-   memset(freq, 0, sizeof(freq));
+   bool freq[10] = { 0 };
    for (size_t i = 0; i < TableLength; ++i)
    {
       auto const &cell = part[i];
