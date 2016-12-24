@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "Data.h"
 
 void Data::Init(char const* data)
@@ -33,14 +34,11 @@ void Data::Print(PrintType type) const
          else
          {
             if (type == Data::PrintType::Compact)
-            {
                std::cout << Any;
-            }
             else
-            {
                std::cout << "(" << current.values.size() << ")";
-               variants *= current.values.size();
-            }
+
+            variants *= current.values.size();
          }
 
          std::cout << Space;
@@ -51,7 +49,7 @@ void Data::Print(PrintType type) const
       if (i == 2 || i == 5)
          std::cout << std::endl;
    }
-   std::cout << "Variants: " << std::hex << variants << std::endl;
+   std::cout << "Variants: " << std::hex << variants << std::dec << std::endl;
 }
 
 void Data::Prepare()
@@ -82,7 +80,7 @@ void Data::Prepare()
    }
 }
 
-void Data::Solve()
+bool Data::Solve(unsigned __int64 &steps)
 {
    while(true)
    {
@@ -115,6 +113,8 @@ void Data::Solve()
 
       if (!changes) break;
    }
+
+   return Brutforce(steps);
 }
 
 bool Data::IsValid() const
@@ -341,4 +341,128 @@ bool Data::CheckCol(size_t col)
    }
 
    return changes;
+}
+
+bool Data::CanSetToCell(size_t row, size_t col, Cell::dataType value) const
+{
+   static auto isCoincides = [](Cell const& cell, Cell::dataType value) -> bool
+   {
+      if (cell.IsUniquely() && *cell.values.begin() == value)
+         return false;
+
+      if (cell.search != cell.values.end() && *cell.search == value)
+         return false;
+
+      return true;
+   };
+
+   //Проверка строки
+   for (size_t i = 0; i < 9; ++i)
+   {
+      if (i == col) //игнорируем саму ячейку
+         continue;
+      
+      if (!isCoincides(Sudoku[row][i], value))
+         return false;
+   }
+
+   //Проверка столбца
+   for (size_t i = 0; i < 9; ++i)
+   {
+      if (i == row) //игнорируем саму ячейку
+         continue;
+      
+      if (!isCoincides(Sudoku[i][col], value))
+         return false;
+   }
+
+   //Проверка квадрата
+   size_t squadRow = row / 3;
+   size_t squadCol = col / 3;
+   for (size_t i = 3*squadRow; i < 3*squadRow + 3; ++i)
+   {
+      for (size_t j = 3*squadCol; j < 3*squadCol + 3; ++j)
+      {
+         if (i == row && j == col) //игнорируем саму ячейку
+            continue;
+
+         if (!isCoincides(Sudoku[i][j], value))
+            return false;
+      }
+   }
+
+   return true;
+}
+
+bool Data::Brutforce(unsigned __int64 &steps)
+{
+   //Вспомогательные функции
+   auto GetRow = [](size_t i) -> size_t { return i / 9; };
+   auto GetCol = [](size_t i) -> size_t { return i % 9; };
+   auto GetI   = [](size_t row, size_t col) -> size_t { return row * 9 + col; };
+
+   std::vector<size_t> values; //номера ячеек с неопределенными значениями
+   //Заполнение адресов с неопределенными значениями и выставление указателей
+   for(size_t i = 0; i < 81; ++i)
+   {
+      size_t row = GetRow(i);
+      size_t col = i % 9;
+
+      Cell &cell = Sudoku[row][col];
+      if (cell.IsUniquely()) continue;
+      values.push_back(i);
+      cell.search = cell.values.end();
+   }
+
+   //Поиск перебором
+   std::vector<size_t>::iterator current = values.begin();
+   bool isNext = true; //флаг о том, что перешли к следующему, а не предыдущему элементу
+   steps = 0; //количество шагов в поиске решения
+   while (current != values.end())
+   {
+      //Определение текущей ячейки
+      size_t row = GetRow(*current);
+      size_t col = GetCol(*current);
+      Cell &cell = Sudoku[row][col];
+
+      if (isNext) //если передвинулись на следующую ячейку - начинаем перебор сначала
+         cell.search = cell.values.begin();
+      else //если передвинулись назад - начинаем перебор со следующего элемента
+         ++cell.search;
+
+      isNext = false;
+      while(cell.search != cell.values.end())
+      {
+         ++steps;
+         if (CanSetToCell(row, col, *cell.search)) //ищем возможное значение
+         {
+            //двигаться вперед
+            isNext = true;
+            break;
+         }
+         ++cell.search;
+      }
+
+      if (isNext) //двигаемся вперед
+         ++current;
+      else //двигаемся назад
+      {
+         if (current == values.begin())
+            return false;
+         --current;
+      }
+   }
+
+   //Расстановка найденых значений
+   for(size_t i = 0; i < 81; ++i)
+   {
+      size_t row = GetRow(i);
+      size_t col = i % 9;
+
+      Cell &cell = Sudoku[row][col];
+      if (cell.IsUniquely()) continue;
+      cell.MakeUniquely(*cell.search);
+   }
+
+   return true;
 }
